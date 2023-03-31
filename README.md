@@ -16,6 +16,19 @@ A simple natural language to SQL converter
 4. The prompt is sent to OpenAI's Completion API
 5. Grab the resulting query and run it in the database
 
+## The Prompt Sent to OpenAI
+
+```
+### sqlite SQL table, with its properties:
+# 
+# instruments({columns in data})
+# 
+### A query to answer: {natural language prompt}
+SELECT
+```
+
+The SELECT keyword at the end of the prompt is meant to force the LLM to produce a SELECT statement only.  
+This app is unable to produce potentially harmful DROP, DELETE, and UPDATE statements because the Completion API stops producing tokens after a semi-colon, which signifies the end of the SELECT statement.
 
 ## How to run on machine
 1. Get an API key from OpenAI, and place it in a file called `secret.py` in the root
