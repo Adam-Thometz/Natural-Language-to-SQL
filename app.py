@@ -4,49 +4,32 @@ import pandas as pd
 
 from secret import API_KEY
 from sqlalchemy import create_engine, text
-from utils import combine_prompts, handle_response
+from utils import create_prompt, call_openai
 
 os.environ["OPENAI_API_KEY"] = API_KEY
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-df = pd.read_json("instruments.json")
+EXIT_KEY = "q"
 
+df = pd.read_json("instruments.json")
 # TEMP DATABASE IN RAM
 temp_db = create_engine("sqlite:///:memory:")
 # PUSH PANDAS DF ---> TEMP DB
 df.to_sql(name="instruments", con=temp_db)
 
-# SQL query on TEMP DB
-# with temp_db.connect() as conn:
-    # makes connection
-    # run code in indentation/block
-    # result = conn.execute(text("SELECT * FROM instruments"))
-    # print(result.all())
-    # auto close connection
+user_input = ""
+while user_input != EXIT_KEY:
+    print("Enter a prompt. Enter q to quit")
+    user_input = input()
+    if user_input != EXIT_KEY:
+        query_result = create_prompt(df, user_input) # DF + query that does ...
+        result = call_openai(query_result)
 
+        with temp_db.connect() as conn:
+            result = conn.execute(text(result))
 
-user_input = "show all rhythmic instruments" # NL
-query_result = combine_prompts(df, user_input) # DF + query that does ... + NLP
-# print(query_result)
-
-response = openai.Completion.create(
-    model='text-davinci-002',
-    prompt=query_result,
-    temperature=0,
-    max_tokens=150,
-    top_p=1.0,
-    frequency_penalty=0,
-    presence_penalty=0,
-    stop=['#', ';']
-)
-# print("API response", response)
-# print("handled response", handle_response(response))
-
-with temp_db.connect() as conn:
-    query = handle_response(response)
-    result = conn.execute(text(query))
-
-print("results", result.all())
+        print("results", [instrument.name for instrument in result.all()])
+print("Bye!")
 
 # HOW TO PICK A LANGUAGE MODEL
 # Think about cost of the model and how often you'll use it
