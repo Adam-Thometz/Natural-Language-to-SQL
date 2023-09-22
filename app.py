@@ -28,7 +28,12 @@ while user_input != EXIT_KEY:
         with temp_db.connect() as conn:
             result = conn.execute(text(result))
 
-        print("results", [instrument.name for instrument in result.all()])
+        print("**********")
+        print("RESULTS **")
+        print("**********")
+        for i, instrument in enumerate(result.all()):
+            print(f"{i+1}. {instrument.name.lower().capitalize()}")
+        print("**********")
 print("Bye!")
 
 # HOW TO PICK A LANGUAGE MODEL
