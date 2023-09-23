@@ -10,6 +10,7 @@ os.environ["OPENAI_API_KEY"] = API_KEY
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 EXIT_KEY = "q"
+ERROR_MESSAGE = "Sorry, no results 🤷🏼‍♂️"
 
 df = pd.read_json("instruments.json")
 # TEMP DATABASE IN RAM
@@ -23,15 +24,16 @@ while user_input != EXIT_KEY:
     user_input = input()
     if user_input != EXIT_KEY:
         query_result = create_prompt(df, user_input) # DF + query that does ...
-        result = call_openai(query_result)
+        response = call_openai(query_result)
+        print(f"Query: {response}")
 
         with temp_db.connect() as conn:
-            result = conn.execute(text(result))
+            result = conn.execute(text(response))
 
+        print("Results: *")
         print("**********")
-        print("RESULTS **")
-        print("**********")
-        for i, instrument in enumerate(result.all()):
+        returned_data = result.all()
+        for i, instrument in enumerate(returned_data):
             print(f"{i+1}. {instrument.name.lower().capitalize()}")
         print("**********")
 print("Bye!")

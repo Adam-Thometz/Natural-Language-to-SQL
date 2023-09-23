@@ -1,12 +1,11 @@
 import openai
 
 def create_table_definition(df):
-    prompt = """
+    prompt = f"""
     ### sqlite SQL table, with its properties:
     # 
-    # instruments({})
-    # 
-    """.format(",".join(str(col) for col in df.columns))
+    # instruments({",".join(str(col) for col in df.columns)})
+    """
 
     return prompt
 
